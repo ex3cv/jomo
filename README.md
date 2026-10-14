@@ -142,6 +142,18 @@ The engineering approach is intentionally modest:
 The same restraint applies to features. Organizing, tracking, and gamifying the
 tabs would miss the point of letting them go.
 
+### Continuous integration
+
+[Forgejo Actions](.forgejo/workflows/test.yml) runs `make check` on pushes and pull
+requests. Run the same command locally; CI only orchestrates the validation
+defined by the Makefile. The job uses the official Node.js 24 LTS Bookworm image,
+which includes Make, and installs `libxml2-utils` for `xmllint`.
+
+The workflow assumes a container-capable runner labeled `ubuntu-latest`; no runner
+configuration is recorded in this repository. Adjust `runs-on` if your Forgejo
+installation uses a different label. Execution on the actual runner remains to
+be verified.
+
 ### Manual Firefox verification
 
 Manual Firefox verification has **not yet been performed**. Use disposable tabs
