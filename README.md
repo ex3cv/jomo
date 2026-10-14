@@ -10,6 +10,8 @@
 
 **Joy of Missing Out. A small Firefox extension for letting go of tabs.**
 
+![JOMO mushroom cloud icon](icons/jomo-96.png)
+
 We leave articles, documentation, GitHub repositories,
 and discussions open for later. Eventually, the browser becomes an accidental
 TODO list. Curiosity turns into obligation, and a row of tabs becomes a collection
@@ -62,10 +64,25 @@ sarcastic, provocative, and slightly cynical. The joke is the absurdity of tryin
 to consume an endless internet, never the person with too many tabs open. No
 shaming, no lectures about better habits.
 
-The planned icon is a **mushroom cloud**: deliberately provocative, representing
+## Visual identity
+
+The icon is a **mushroom cloud**: deliberately provocative, representing
 the destruction of accumulated browser clutter, not violence against people.
 The contrast is intentional: the icon says “Nuke the tabs.” The interface says
 “It's okay to let go.” Any interface text will avoid aggressive language.
+
+A broad amber canopy, narrow stem, and charcoal outline keep the silhouette
+readable on light and dark toolbars. No fireworks required. The transparent
+vector source is `icons/jomo.svg`; the 16, 32, 48, and 96 pixel PNGs are rendered
+from it with `rsvg-convert` (librsvg):
+
+```sh
+for size in 16 32 48 96; do
+  rsvg-convert -w "$size" -h "$size" icons/jomo.svg -o "icons/jomo-$size.png"
+done
+```
+
+The converter is only needed when regenerating artwork, not to run JOMO.
 
 ## Installation and use
 
@@ -79,8 +96,7 @@ Use desktop Firefox 109 or newer. There is no build step:
 Click JOMO's toolbar button to immediately close unpinned tabs across **all
 regular, non-private windows**, not just the current window. Pinned tabs remain;
 private and non-regular windows are excluded. There is no confirmation, popup,
-notification, or completion screen. The temporary icon is a simple **J**;
-the mushroom cloud artwork will come later.
+notification, or completion screen.
 
 Temporary installation lasts until Firefox restarts. Firefox Add-ons installation
 instructions will be added when a published release is available.
@@ -100,7 +116,8 @@ and cleanup also checks window and tab privacy explicitly.
 
 ## Development
 
-Use Node.js 18 or newer and Make. No npm install, dependencies, or bundler:
+Use Node.js 18 or newer, Make, and `xmllint` (libxml2, for SVG XML validation).
+No npm install, runtime dependencies, or bundler:
 
 ```sh
 make test   # Node's built-in test runner
@@ -110,7 +127,8 @@ make check  # Tests, JavaScript syntax checks, and manifest JSON validation
 Tests run the actual background script with lightweight browser API fakes. They
 cover toolbar-only cleanup, pinned tabs, multiple windows, private and non-regular
 windows, empty states, eligibility changes, disappearing tabs/windows, API errors,
-repeated clicks, and permission scope. These checks do not prove actual Firefox
+repeated clicks, permission scope, icon paths, PNG dimensions, and SVG XML validity.
+These checks do not prove actual Firefox
 behavior or replace Firefox's manifest validation when loading the extension.
 
 The engineering approach is intentionally modest:

@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 const vm = require("node:vm");
+const { execFileSync } = require("node:child_process");
 
 const source = readFileSync(join(__dirname, "../background.js"), "utf8");
 
@@ -176,4 +177,27 @@ test("manifest uses Firefox MV3 scripts without permissions or additional UI", (
   assert.equal(manifest.options_ui, undefined);
   assert.equal(manifest.content_scripts, undefined);
   assert.ok(readFileSync(join(__dirname, "..", manifest.action.default_icon)).length);
+});
+
+test("manifest icon assets exist and PNG dimensions match every declared size", () => {
+  const manifest = JSON.parse(readFileSync(join(__dirname, "../manifest.json"), "utf8"));
+  assert.deepEqual(Object.keys(manifest.icons), ["16", "32", "48", "96"]);
+  for (const [size, path] of Object.entries(manifest.icons)) {
+    const png = readFileSync(join(__dirname, "..", path));
+    assert.equal(path, `icons/jomo-${size}.png`);
+    assert.deepEqual(png.subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+    assert.equal(png.toString("ascii", 12, 16), "IHDR");
+    assert.equal(png.readUInt32BE(16), Number(size));
+    assert.equal(png.readUInt32BE(20), Number(size));
+  }
+  assert.equal(manifest.action.default_icon, "icons/jomo.svg");
+  assert.equal(manifest.action.default_title, "JOMO — Let go of unpinned tabs");
+});
+
+test("canonical toolbar SVG is well-formed XML with an SVG root", () => {
+  const path = join(__dirname, "../icons/jomo.svg");
+  execFileSync("xmllint", ["--nonet", "--noout", path]);
+  const root = execFileSync("xmllint", ["--nonet", "--xpath",
+    "concat(local-name(/*), '|', namespace-uri(/*))", path], { encoding: "utf8" });
+  assert.equal(root.trim(), "svg|http://www.w3.org/2000/svg");
 });
