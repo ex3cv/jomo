@@ -146,6 +146,7 @@ tabs would miss the point of letting them go.
 
 Manual Firefox verification has **not yet been performed**. Use disposable tabs
 in a test profile: clicking JOMO affects every regular window in that profile.
+Automated tests cannot establish actual Firefox background lifecycle behavior.
 
 1. Install temporarily using the steps above. Verify installation and extension
    reload leave existing tabs alone. Open new windows and tabs; verify they stay.
@@ -162,6 +163,10 @@ in a test profile: clicking JOMO affects every regular window in that profile.
 6. Open more disposable tabs and click repeatedly while cleanup runs. Verify no
    duplicate-removal errors, then open another tab and verify a later click works.
 7. Inspect JOMO's background console via **Inspect** in `about:debugging` for errors.
+8. With JOMO temporarily loaded, open several unpinned tabs and at least one pinned
+   tab. Close the extension's background debugger and allow Firefox to suspend the
+   background context. Click the JOMO toolbar icon to reactivate it. Verify that
+   eligible unpinned tabs close and pinned tabs remain untouched.
 
 ### Known limitations
 

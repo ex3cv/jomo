@@ -179,6 +179,11 @@ test("manifest uses Firefox MV3 scripts without permissions or additional UI", (
   assert.ok(readFileSync(join(__dirname, "..", manifest.action.default_icon)).length);
 });
 
+test("manifest declares that JOMO collects no data", () => {
+  const manifest = JSON.parse(readFileSync(join(__dirname, "../manifest.json"), "utf8"));
+  assert.deepEqual(manifest.browser_specific_settings.gecko.data_collection_permissions.required, ["none"]);
+});
+
 test("manifest icon assets exist and PNG dimensions match every declared size", () => {
   const manifest = JSON.parse(readFileSync(join(__dirname, "../manifest.json"), "utf8"));
   assert.deepEqual(Object.keys(manifest.icons), ["16", "32", "48", "96"]);
