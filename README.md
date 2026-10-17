@@ -1,5 +1,7 @@
 # JOMO
 
+**Joy of Missing Out. A small Firefox extension for letting go of tabs.**
+
 *You can't read the entire internet.*
 
 *Your browser is not a retirement home for interesting articles.*
@@ -7,8 +9,6 @@
 **One click. No negotiations.**
 
 *The internet will still be there tomorrow.*
-
-**Joy of Missing Out. A small Firefox extension for letting go of tabs.**
 
 ![JOMO mushroom cloud icon](icons/jomo-96.png)
 
@@ -22,12 +22,12 @@ conscious decision to let some of it go.
 
 ## What JOMO does
 
-JOMO is a Firefox extension intended for open-source release. It will:
+JOMO is a Firefox extension intended for open-source release. It:
 
-- Provide a toolbar button that immediately closes **all eligible
+- Provides a toolbar button that immediately closes **all eligible
   unpinned tabs across regular, non-private Firefox windows** when clicked.
-- Preserve pinned tabs.
-- Leave private windows untouched.
+- Preserves pinned tabs.
+- Leaves private windows untouched.
 
 The toolbar click itself is your decision. JOMO will never close tabs automatically.
 
@@ -36,7 +36,7 @@ The toolbar click itself is your decision. JOMO will never close tabs automatica
 JOMO is not a productivity app, a tab manager, or a bookmarking system. It won't
 move your digital obligations into a tidier pile.
 
-There will be no:
+There are no:
 
 - Confirmation dialogs, popups, or countdowns.
 - Second chances offered by JOMO or unnecessary interactions.
@@ -71,131 +71,46 @@ the destruction of accumulated browser clutter, not violence against people.
 The contrast is intentional: the icon says “Nuke the tabs.” The interface says
 “It's okay to let go.” Any interface text will avoid aggressive language.
 
-A broad amber canopy, narrow stem, and charcoal outline keep the silhouette
-readable on light and dark toolbars. No fireworks required. The transparent
-vector source is `icons/jomo.svg`; the 16, 32, 48, and 96 pixel PNGs are rendered
-from it with `rsvg-convert` (librsvg):
+## Installation
 
-```sh
-for size in 16 32 48 96; do
-  rsvg-convert -w "$size" -h "$size" icons/jomo.svg -o "icons/jomo-$size.png"
-done
-```
-
-The converter is only needed when regenerating artwork, not to run JOMO.
-
-## Installation and use
-
-Use desktop Firefox 109 or newer. There is no build step:
+Use desktop Firefox 109 or newer:
 
 1. Download or clone this repository.
 2. Open `about:debugging#/runtime/this-firefox` in Firefox.
-3. Click **Load Temporary Add-on…** and select this repository's `manifest.json`.
+3. Click **Load Temporary Add-on…** and select this repository's
+   [manifest.json](manifest.json).
 4. Pin JOMO to the toolbar from Firefox's Extensions menu if needed.
+
+Temporary installation lasts until Firefox restarts. This repository does not
+currently provide published Firefox Add-ons installation instructions.
+
+## Usage
 
 Click JOMO's toolbar button to immediately close unpinned tabs across **all
 regular, non-private windows**, not just the current window. Pinned tabs remain;
 private and non-regular windows are excluded. There is no confirmation, popup,
 notification, or completion screen.
 
-Temporary installation lasts until Firefox restarts. Firefox Add-ons installation
-instructions will be added when a published release is available.
+JOMO requests no access to website contents and does not collect telemetry or
+store URLs or browsing history.
 
-### Permissions and compatibility
+A few things to expect:
 
-JOMO requests **no API or host permissions**. Reading tab IDs, pinned state, and
-window metadata and removing tabs do not require the `tabs` permission, which
-would grant access to sensitive tab properties. See Mozilla's
-[Tabs API documentation](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs).
-JOMO does not read or store URLs or browsing history.
-
-The Manifest V3 extension uses Firefox's supported
-[background scripts](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/background),
-not a Chrome service worker. Private browsing access is disabled in the manifest,
-and cleanup also checks window and tab privacy explicitly.
+- Clicks while cleanup is running are ignored. Newly opened tabs and tabs moved
+  to another window during cleanup may remain until another click.
+- Avoid pinning tabs during cleanup: a tab pinned at the very last moment can
+  still close because Firefox checks and closes tabs in separate steps.
+- When a window's last tab closes, Firefox may close the window or create a
+  replacement tab. JOMO leaves that behavior to Firefox.
+- If Firefox cannot check or close a tab, it may remain open. JOMO does not retry
+  automatically or show an error screen.
+- JOMO provides no backup or undo. Firefox's own session behavior is independent
+  of JOMO.
 
 ## Development
 
-Use Node.js 18 or newer, Make, and `xmllint` (libxml2, for SVG XML validation).
-No npm install, runtime dependencies, or bundler:
-
-```sh
-make test   # Node's built-in test runner
-make check  # Tests, JavaScript syntax checks, and manifest JSON validation
-```
-
-Tests run the actual background script with lightweight browser API fakes. They
-cover toolbar-only cleanup, pinned tabs, multiple windows, private and non-regular
-windows, empty states, eligibility changes, disappearing tabs/windows, API errors,
-repeated clicks, permission scope, icon paths, PNG dimensions, and SVG XML validity.
-These checks do not prove actual Firefox
-behavior or replace Firefox's manifest validation when loading the extension.
-
-The engineering approach is intentionally modest:
-
-- Follow KISS and YAGNI: build only what the current requirements need.
-- Keep dependencies minimal and prefer browser-native APIs.
-- Avoid unnecessary abstractions and configuration without a demonstrated need.
-- Favor simple, understandable code.
-- Test behavior rather than implementation details.
-
-The same restraint applies to features. Organizing, tracking, and gamifying the
-tabs would miss the point of letting them go.
-
-### Continuous integration
-
-[Forgejo Actions](.forgejo/workflows/test.yml) runs `make check` on pushes and pull
-requests. Run the same command locally; CI only orchestrates the validation
-defined by the Makefile. The job uses the official Node.js 24 LTS Bookworm image,
-which includes Make, and installs `libxml2-utils` for `xmllint`.
-
-The workflow assumes a container-capable runner labeled `ubuntu-latest`; no runner
-configuration is recorded in this repository. Adjust `runs-on` if your Forgejo
-installation uses a different label. Execution on the actual runner remains to
-be verified.
-
-### Manual Firefox verification
-
-Manual Firefox verification has **not yet been performed**. Use disposable tabs
-in a test profile: clicking JOMO affects every regular window in that profile.
-Automated tests cannot establish actual Firefox background lifecycle behavior.
-
-1. Install temporarily using the steps above. Verify installation and extension
-   reload leave existing tabs alone. Open new windows and tabs; verify they stay.
-2. Open two regular windows, each with pinned and unpinned tabs.
-3. Open a private window with tabs. Create a separate popup window, for example
-   from a page's developer console with
-   `window.open("about:blank", "jomo-test", "popup,width=400,height=300")`.
-   Allow that test popup if Firefox blocks it, and confirm it opens as a popup
-   window rather than a regular tab.
-4. Click JOMO in a regular window. Verify unpinned tabs in both regular windows
-   disappear, pinned tabs remain, and private/popup windows are unaffected.
-5. Test a regular window containing only one unpinned tab. Accept Firefox's native
-   replacement-tab or window-closing behavior; JOMO must not explicitly close windows.
-6. Open more disposable tabs and click repeatedly while cleanup runs. Verify no
-   duplicate-removal errors, then open another tab and verify a later click works.
-7. Inspect JOMO's background console via **Inspect** in `about:debugging` for errors.
-8. With JOMO temporarily loaded, open several unpinned tabs and at least one pinned
-   tab. Close the extension's background debugger and allow Firefox to suspend the
-   background context. Click the JOMO toolbar icon to reactivate it. Verify that
-   eligible unpinned tabs close and pinned tabs remain untouched.
-
-### Known limitations
-
-- Each candidate's window is checked again, then its current pinned state,
-  privacy, and window ID are checked immediately before removal. Tabs moved out
-  of the checked window are skipped for that click. Newly opened tabs are not
-  added to an in-progress cleanup.
-- Firefox's `tabs.remove()` has no atomic “remove only if still unpinned” option.
-  A tab pinned after the final check but before removal can still be closed.
-  Sequential checks minimize this race; they cannot eliminate it.
-- Firefox may close a window or create a replacement tab when its last tab is
-  removed. JOMO accepts that behavior and never calls `windows.remove()`.
-- Clicks during cleanup are ignored, not queued. API failures skip the affected
-  candidate and log a generic error without browsing data; enumeration failure
-  ends that cleanup. There are no retries or user-facing error screens.
-- There is no JOMO backup or undo. Firefox's own session behavior is independent
-  of JOMO.
+See [Developing JOMO](docs/development.md) for the repository structure, local
+setup, validation, Firefox considerations, and packaging status.
 
 ## License
 
