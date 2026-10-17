@@ -114,5 +114,4 @@ setup, validation, Firefox considerations, and packaging status.
 
 ## License
 
-An open-source license will be selected and added before release. No license has
-been granted yet.
+JOMO is open-source software licensed under the MIT License. See [LICENSE](LICENSE)⁠￼for details.
