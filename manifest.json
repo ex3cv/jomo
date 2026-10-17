@@ -21,6 +21,7 @@
     "gecko": {
       "id": "jomo@extensions.local",
       "strict_min_version": "109.0",
+      "update_url": "https://raw.githubusercontent.com/ex3cv/jomo/main/updates.json",
       "data_collection_permissions": {
         "required": ["none"]
       }
