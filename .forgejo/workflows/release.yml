@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: docker
+    container:
+      image: node:24-alpine
+    steps:
+      - uses: https://data.forgejo.org/actions/checkout@v6
+        with:
+          ref: ${{ forgejo.ref }}
+      - name: Install validation and packaging tools
+        run: apk add --no-cache libxml2-utils make zip unzip
+      - name: Validate
+        run: make check
+      - name: Verify tag
+        env:
+          RELEASE_TAG: ${{ forgejo.ref_name }}
+        run: node scripts/release.mjs --check-tag
+      - name: Package
+        run: make package
+      - name: Publish unsigned release
+        env:
+          RELEASE_TAG: ${{ forgejo.ref_name }}
+          FORGEJO_API_URL: ${{ forgejo.api_url }}
+          FORGEJO_REPOSITORY: ${{ forgejo.repository }}
+          FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+        run: node scripts/release.mjs

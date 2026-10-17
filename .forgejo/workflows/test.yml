@@ -12,6 +12,6 @@ jobs:
       - name: Install XML validation tool
         run: |
           apk update
-          apk add --no-cache libxml2-utils make
+          apk add --no-cache libxml2-utils make zip unzip
       - name: Validate
         run: make check
